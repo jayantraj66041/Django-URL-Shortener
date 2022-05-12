@@ -1,0 +1,71 @@
+{% include 'base.html' %}
+
+{% block content %}
+<div class="container">
+    <div class="row">
+        <div class="col-lg-5 mx-auto">
+            <div class="card mt-5">
+                <div class="card-header">
+                    <p class="lead mb-0 text-center text-muted fw-bold text-decoration-underline">Short Url Generator</p>
+                </div>
+                <div class="card-body">
+                    <div class="mb-2">
+                        <label for="" class="small text-muted">Url</label>
+                        <input type="search" id="url" class="form-control">
+                    </div>
+                    <div class="mb-2">
+                        <label for="" class="small text-muted">Short url</label>
+                        <input type="text" id="short_url" class="form-control">
+                        <div class="valid-feedback">
+                            URL Copied on clipboard.
+                        </div>
+                    </div>
+                    <div class="mb-2">
+                        <button type="btn" id="submit-btn" class="btn mt-1 btn-primary">Generate</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    let submitBtn = document.getElementById("submit-btn");
+    let url = document.getElementById("url");
+    let short_url = document.getElementById("short_url");
+
+    short_url.onfocus = function(){
+        short_url.select();
+        navigator.clipboard.writeText(short_url.value);
+        short_url.classList.add("is-valid");
+    }
+
+    url.onfocus = function(){
+        short_url.classList.remove("is-valid");
+        url.select();
+    }
+
+    submitBtn.onclick = function(){
+        const xhr = new XMLHttpRequest();
+
+        xhr.open('POST', window.location.origin + "/api/short-url/", true);
+        xhr.setRequestHeader('X-CSRFToken', "{{csrf_token}}");
+        xhr.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+        short_url.classList.remove("is-valid");
+        xhr.onload = function (){
+            if (this.status === 201){
+                data = JSON.parse(this.responseText);
+                console.log(data.short_url, data);
+                short_url.value = data.short_url;
+            }
+            else{
+
+            }
+        }
+
+        let jsondata = { 'url': url.value };
+        let data = new URLSearchParams(Object.entries(jsondata)).toString();
+        xhr.send(data);
+    }
+</script>
+{% endblock content %}
